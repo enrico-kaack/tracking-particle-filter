@@ -120,7 +120,7 @@ void trackSequence(std::string seq)
         cv::Mat frame, frameLab;
         frame= rgbs[i];
         //convert the frame to Lab space
-        cv::cvtColor(frame, frameLab, CV_BGR2Lab);
+        cv::cvtColor(frame, frameLab, cv::COLOR_BGR2Lab);
 	
 	
 	processFrame(frame,frameLab,particles,mm,om,engine);
@@ -180,7 +180,7 @@ void liveTracking()
         if( frame.empty() ) break; // end of video stream
         
         //convert the frame to Lab space
-        cv::cvtColor(frame, frameLab, CV_BGR2Lab);
+        cv::cvtColor(frame, frameLab, cv::COLOR_BGR2Lab);
 	
         processFrame(frame,frameLab,particles,mm,om,engine);
         
