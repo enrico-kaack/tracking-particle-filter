@@ -28,7 +28,7 @@ To create a makefile, run:
 cmake .
 ```
 
-If you're using a makefile, build and run on one of the video sequences:
+Build it and run on one of the video sequences:
 ```sh
 make
 ./trackingEx ../seq1
