@@ -4,6 +4,8 @@ project(TrackingEx)
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package(OpenCV REQUIRED)
+set(OpenCV_INCLUDE_DIRS "/usr/include/opencv4")
+
 if(NOT OpenCV_FOUND)
         # make FIND_PACKAGE friendly
         if(NOT OpenCV_FIND_QUIETLY)
