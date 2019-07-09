@@ -5,6 +5,9 @@
 class ObservationModel{
 
 public:
+
+    cv::Mat histogram;
+    double lambda;
   
 /**
 * \brief  the constructor

@@ -39,12 +39,26 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
     {
                 
 	//calculate weights (the observation likelihood) for particles using the observation model
-	//IMPLEMENT
+        for (auto i = 0; i < particles.size(); ++i) {
+            particles[i].weight = om->likelihood(frame, particles[i]);
+        }
 
         Particle meanP(0,0,0);
-	//calculate mean particle using the weights
-	//IMPLEMENT
-        
+	    //calculate mean particle using the weights (wheighted mean: summed, wheigted x and y and then divide by sum of wheigt)
+	    double x,y, size, sumOfWheight = 0;
+
+        for (int j = 0; j < particles.size(); ++j) {
+            x += particles[j].x * particles[j].weight;
+            y += particles[j].y * particles[j].weight;
+            size += particles[j].size * particles[j].weight;
+            sumOfWheight += particles[j].weight;
+        }
+        meanP.x = x / sumOfWheight;
+        meanP.y = y / sumOfWheight;
+        //meanP.size = size / sumOfWheight;
+        std::cout<< meanP.x << "|" <<meanP.y << "|" << meanP.size <<std::endl;
+
+
 	//resample the particles using their weights
         particles= resampleParticles(particles, particles.size(), engine);
  
@@ -168,6 +182,8 @@ void liveTracking()
     
     
     long ticks=cv::getTickCount(); //init tick counter
+
+
     
     // main loop
     for(;;)
@@ -181,11 +197,11 @@ void liveTracking()
         
         //convert the frame to Lab space
         cv::cvtColor(frame, frameLab, cv::COLOR_BGR2Lab);
-	
+
         processFrame(frame,frameLab,particles,mm,om,engine);
         
 	// wait one millisec for input
-        int key= cv::waitKey(1);
+        int key= 1;//cv::waitKey(1);
         if(key == 27 ) break; // stop capturing by pressing ESC
         // if a key was pressed -> we switch wetween tracking and not tracking
         if(key != -1)
@@ -214,9 +230,9 @@ void liveTracking()
 	  double time=(cv::getTickCount()-ticks)/cv::getTickFrequency();
 	  ticks=cv::getTickCount();
 	  
-	  for(int j=0; j<50; j++)   std::cout<<"\b";
+	  //for(int j=0; j<50; j++)   std::cout<<"\b";
 	  std::cout<< "fps:"<<((double)(10.0)/time );
-	  std::cout <<std::flush;
+	  //std::cout <<std::flush;
 	}
 	c++; //increase frame counter
     }
@@ -226,6 +242,7 @@ void liveTracking()
 
 int main(int argc, char** argv)
 {
+    std::setvbuf(stdout, NULL, _IONBF, 0);
     if(argc<2) liveTracking(); // if no argument is provided start live tracking
     else trackSequence(argv[1]); // do tracking in a recorded sequence
     return 0;
