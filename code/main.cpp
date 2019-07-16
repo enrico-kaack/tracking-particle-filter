@@ -7,6 +7,7 @@
 #include "Particle.h"
 #include "MotionModel.h"
 #include "ObservationModel.h"
+#include <cmath>
 
 
 /**
@@ -67,18 +68,21 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
         }
 
         Particle meanP(0,0,0);
-	    //calculate mean particle using the weights (wheighted mean: summed, wheigted x and y and then divide by sum of wheigt)
-	    double x,y, size, sumOfWheight = 0;
+	    //calculate mean particle using the weights (weighted mean: summed, weighted x and y and then divide by sum of weight)
+	    double x = 0.0;
+	    double y = 0.0;
+	    double size = 0.0;
+	    double sumOfWeight = 0.0;
 
         for (int j = 0; j < particles.size(); ++j) {
             x += particles[j].x * particles[j].weight;
             y += particles[j].y * particles[j].weight;
             size += particles[j].size * particles[j].weight;
-            sumOfWheight += particles[j].weight;
+            sumOfWeight +=   particles[j].weight;
         }
-        meanP.x = x / sumOfWheight;
-        meanP.y = y / sumOfWheight;
-        meanP.size = size / sumOfWheight;
+        meanP.x = x / sumOfWeight;
+        meanP.y = y / sumOfWeight;
+        meanP.size = size / sumOfWeight;
         std::cout<< meanP.x << "|" <<meanP.y << "|" << meanP.size <<std::endl;
 
 
@@ -95,7 +99,7 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
         for (int i = 0; i < particles.size(); i += 10) {
             particles[i].draw(frame, cv::Scalar(0, 0, 255));
         }
-	  
+
 	// draw boundingbox of mean particle in blue into the RGB-frame
         // IMPLEMENT
         meanP.draw(frame, cv::Scalar(255, 0, 0));

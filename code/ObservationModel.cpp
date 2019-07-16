@@ -46,9 +46,9 @@
       // normalize it
         cv::normalize(subHist, subHist);
 
-        // compare it to the stored histogram using the cv::compareHist function (use the Bahttacharyya distance)
-        double histDist = cv::compareHist(this->histogram, subHist, cv::HISTCMP_BHATTACHARYYA);
+    // compare it to the stored histogram using the cv::compareHist function (use the Bahttacharyya distance)
+    double histDist = cv::compareHist(this->histogram, subHist, cv::HISTCMP_BHATTACHARYYA);
 	// return the likelihood exp(-lambda * histogram_distance)
-	return  cv::exp(-this->lambda*histDist);
+	return  exp(-this->lambda*histDist);
   }
 
