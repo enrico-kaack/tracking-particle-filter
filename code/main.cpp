@@ -19,7 +19,30 @@
 std::vector<Particle> resampleParticles(std::vector<Particle>& particles, int numberOfParticles, std::mt19937 engine)
 {
     // IMPLEMENT
-    return particles;
+
+    //calculate the sum of all wheights
+    double sum_weights = 0.0;
+    for (auto &particle : particles) {
+        sum_weights += particle.weight;
+    }
+
+    std::vector<Particle> particles_new;
+    std::uniform_real_distribution<double> unif(0.0, sum_weights);
+
+    for (int i = 0; i < numberOfParticles; ++i) {
+        double random_num = unif(engine);
+
+        //check which particle is meant with this random number by subtracting the wheights of the parameters before the
+        //target particle, if we reach 0, we have the target particle
+        for (auto &particle : particles) {
+            random_num -= particle.weight;
+            if (random_num <= 0.0) {
+                particles_new.push_back(particle);
+                break;
+            }
+        }
+    }
+    return particles_new;
 }
 
 /**
@@ -39,8 +62,8 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
     {
                 
 	//calculate weights (the observation likelihood) for particles using the observation model
-        for (auto i = 0; i < particles.size(); ++i) {
-            particles[i].weight = om->likelihood(frame, particles[i]);
+        for (auto &particle : particles) {
+            particle.weight = om->likelihood(frame, particle); //particle.wheight is it reference or copy
         }
 
         Particle meanP(0,0,0);
@@ -55,7 +78,7 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
         }
         meanP.x = x / sumOfWheight;
         meanP.y = y / sumOfWheight;
-        //meanP.size = size / sumOfWheight;
+        meanP.size = size / sumOfWheight;
         std::cout<< meanP.x << "|" <<meanP.y << "|" << meanP.size <<std::endl;
 
 
@@ -69,12 +92,19 @@ void processFrame(cv::Mat& frame, cv::Mat& frameLab, std::vector<Particle>& part
        
 	// draw bounding box for every n-th particle in red into the RGB-frame
 	// IMPLEMENT
+        for (int i = 0; i < particles.size(); i += 10) {
+            particles[i].draw(frame, cv::Scalar(0, 0, 255));
+        }
 	  
 	// draw boundingbox of mean particle in blue into the RGB-frame
         // IMPLEMENT
+        meanP.draw(frame, cv::Scalar(255, 0, 0));
 	
 	//move the particles according to the motion model
         //IMPLEMENT
+        for (auto &particle : particles) {
+            particle = mm.move(particle, engine);
+        }
     }
     // in case we don't have an observation model and are not tracking we draw the bounding box in the center
     // it will be used to learn the observation model
@@ -201,7 +231,7 @@ void liveTracking()
         processFrame(frame,frameLab,particles,mm,om,engine);
         
 	// wait one millisec for input
-        int key= 1;//cv::waitKey(1);
+        int key= cv::waitKey(1);
         if(key == 27 ) break; // stop capturing by pressing ESC
         // if a key was pressed -> we switch wetween tracking and not tracking
         if(key != -1)
@@ -232,7 +262,7 @@ void liveTracking()
 	  
 	  //for(int j=0; j<50; j++)   std::cout<<"\b";
 	  std::cout<< "fps:"<<((double)(10.0)/time );
-	  //std::cout <<std::flush;
+	  std::cout <<std::flush;
 	}
 	c++; //increase frame counter
     }

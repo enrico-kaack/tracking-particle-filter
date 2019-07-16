@@ -40,15 +40,15 @@
   
   double ObservationModel::likelihood(cv::Mat img, Particle p){
         // caluclate a histogramm for the window defined by the particle
-        auto subImage = p.getSubImg(img);
-        calculateHist(subImage, subImage);
-
+      cv::Mat subImg = p.getSubImg(img);
+      cv::Mat subHist;
+      calculateHist(subImg, subHist);
       // normalize it
-        cv::normalize(subImage, subImage);
+        cv::normalize(subHist, subHist);
 
         // compare it to the stored histogram using the cv::compareHist function (use the Bahttacharyya distance)
-        double histDist = cv::compareHist(subImage, this->histogram, cv::HISTCMP_BHATTACHARYYA);
+        double histDist = cv::compareHist(this->histogram, subHist, cv::HISTCMP_BHATTACHARYYA);
 	// return the likelihood exp(-lambda * histogram_distance)
-	return  cv::exp(-lambda*histDist);;
+	return  cv::exp(-this->lambda*histDist);
   }
 
